@@ -5,3 +5,5 @@ An example Flask application (adapted from the [Flask 0.12 tutorial](https://www
 ## License
 
 The code from the tutorial is licensed as stated in the LICENSE file.
+
+Logan Brewer's Flaskr Plus Assignment
