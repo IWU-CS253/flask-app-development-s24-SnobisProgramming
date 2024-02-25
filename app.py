@@ -14,7 +14,6 @@ import os
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, g, redirect, url_for, render_template, flash
 
-
 # create our little application :)
 app = Flask(__name__)
 
@@ -68,9 +67,18 @@ def close_db(error):
 @app.route('/')
 def show_entries():
     db = get_db()
-    cur = db.execute('select title, text, category from entries order by id desc')
-    entries = cur.fetchall()
-    return render_template('show_entries.html', entries=entries)
+    # Fetch all categories to use in the dropdown and assign it to a variable.
+    cur = db.execute('SELECT DISTINCT category FROM entries')
+    categories = [row[0] for row in cur.fetchall()]
+    category = request.args.get('category')
+    # This if/else determines category filtering.
+    if category:
+        cur = db.execute('SELECT title, text, category FROM entries WHERE category = ? ORDER BY id DESC', [category])
+        entries = cur.fetchall()
+    else:
+        cur = db.execute('select title, text, category from entries order by id desc')
+        entries = cur.fetchall()
+    return render_template('show_entries.html', entries=entries, category=category, categories=categories)
 
 
 @app.route('/add', methods=['POST'])
@@ -81,3 +89,9 @@ def add_entry():
     db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
+
+# This reroutes back to the main page with the selected category to filter by
+@app.route('/filter', methods=['POST'])
+def filter_entries():
+    category = request.form['category']
+    return redirect(url_for('show_entries', category=category))
