@@ -25,9 +25,16 @@
 
   <ul class="entries">
       {% for entry in entries %}
-        <li><h2>{{ entry.title }}</h2>
+        <li>
+            <h2>{{ entry.title }}</h2>
             <p>Category: {{ entry.category|safe }}</p>
-            {{ entry.text|safe }}</li>
+            {{ entry.text|safe }}
+            <form action="{{ url_for('delete_entry') }}" method="post">
+                <!-- Here I am trying to use the hidden input as told in the instructions. Am I doing this incorrectly?-->
+                <input type="hidden" name="entry_id" value="{{ entry.id }}">
+                <input type="submit" value="Delete">
+            </form>
+        </li>
       {% else %}
         <li><em>Unbelievable.  No entries here so far</em></li>
       {% endfor %}

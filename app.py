@@ -76,7 +76,7 @@ def show_entries():
         cur = db.execute('SELECT title, text, category FROM entries WHERE category = ? ORDER BY id DESC', [category])
         entries = cur.fetchall()
     else:
-        cur = db.execute('select title, text, category from entries order by id desc')
+        cur = db.execute('SELECT title, text, category FROM entries ORDER BY id DESC')
         entries = cur.fetchall()
     return render_template('show_entries.html', entries=entries, category=category, categories=categories)
 
@@ -84,14 +84,27 @@ def show_entries():
 @app.route('/add', methods=['POST'])
 def add_entry():
     db = get_db()
-    db.execute('insert into entries (title, text, category) values (?, ?, ?)',
+    db.execute('INSERT INTO entries (title, text, category) VALUES (?, ?, ?)',
                [request.form['title'], request.form['text'], request.form['category']])
     db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
+
 
 # This reroutes back to the main page with the selected category to filter by
 @app.route('/filter', methods=['POST'])
 def filter_entries():
     category = request.form['category']
     return redirect(url_for('show_entries', category=category))
+
+
+# Out of ideas for what is wrong. I'm unsure why this doesn't actually delete the entry.
+@app.route('/delete', methods=['POST'])
+def delete_entry():
+    db = get_db()
+    entry_id = request.form['entry_id']
+    # Shouldn't this be the correct way to delete an entry?
+    db.execute('DELETE FROM entries WHERE id = ?', [entry_id])
+    db.commit()
+    flash('Wow. You just deleted that entry.')
+    return redirect(url_for('show_entries'))
