@@ -73,10 +73,10 @@ def show_entries():
     category = request.args.get('category')
     # This if/else determines category filtering.
     if category:
-        cur = db.execute('SELECT title, text, category FROM entries WHERE category = ? ORDER BY id DESC', [category])
+        cur = db.execute('SELECT id, title, text, category FROM entries WHERE category = ? ORDER BY id DESC', [category])
         entries = cur.fetchall()
     else:
-        cur = db.execute('SELECT title, text, category FROM entries ORDER BY id DESC')
+        cur = db.execute('SELECT id, title, text, category FROM entries ORDER BY id DESC')
         entries = cur.fetchall()
     return render_template('show_entries.html', entries=entries, category=category, categories=categories)
 
@@ -98,7 +98,7 @@ def filter_entries():
     return redirect(url_for('show_entries', category=category))
 
 
-# Out of ideas for what is wrong. I'm unsure why this doesn't actually delete the entry.
+# Deletes an entry
 @app.route('/delete', methods=['POST'])
 def delete_entry():
     db = get_db()
@@ -107,4 +107,28 @@ def delete_entry():
     db.execute('DELETE FROM entries WHERE id = ?', [entry_id])
     db.commit()
     flash('Wow. You just deleted that entry.')
+    return redirect(url_for('show_entries'))
+
+
+# Route for displaying edit form
+@app.route('/edit/<int:entry_id>', methods=['GET'])
+def edit_entry(entry_id):
+    db = get_db()
+    cur = db.execute('SELECT id, title, text, category FROM entries WHERE id = ?', [entry_id])
+    entry = cur.fetchone()
+    if entry:
+        return render_template('edit_entry.html', entry=entry)
+    else:
+        flash('Entry not found')
+        return redirect(url_for('show_entries'))
+
+
+# Route to handle editing
+@app.route('/edit/<int:entry_id>', methods=['POST'])
+def update_entry(entry_id):
+    db = get_db()
+    db.execute('UPDATE entries SET title = ?, text = ?, category = ? WHERE id = ?',
+               [request.form['title'], request.form['text'], request.form['category'], entry_id])
+    db.commit()
+    flash('Entry updated successfully')
     return redirect(url_for('show_entries'))
