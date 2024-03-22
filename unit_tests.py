@@ -28,6 +28,48 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'<strong>HTML</strong> allowed here' in rv.data
         assert b'A category' in rv.data
 
+    def test_add_entry(self):
+        # Test adding a new entry
+        rv = self.app.post('/add', data=dict(
+            title='Test Entry',
+            text='This entry is for testing purposes. Surprise',
+            category='Test Category (for testing!)'
+        ), follow_redirects=True)
+        assert b'Test Entry' in rv.data
+        assert b'This entry is for testing purposes. Surprise' in rv.data
+        assert b'Test Category (for testing!)' in rv.data
+
+
+def test_filter_entries(self):
+    # Test filtering entries by category
+    self.app.post('/add', data=dict(
+        title='Filtered Entry',
+        text='This is a filtered entry',
+        category='Filtered Category'
+    ))
+    rv = self.app.post('/filter', data=dict(
+        category='Filtered Category'
+    ), follow_redirects=True)
+    assert b'Filtered Entry' in rv.data
+    assert b'This is a filtered entry' in rv.data
+    assert b'Filtered Category' in rv.data
+
+
+def test_delete_entry(self):
+    # Test deleting an entry
+    rv = self.app.post('/add', data=dict(
+        title='Entry to delete',
+        text='This entry will be deleted',
+        category='Deletion Category'
+    ), follow_redirects=True)
+    entry_id = flaskr.get_db().execute('SELECT id FROM entries WHERE title = "Entry to delete"')
+    rv = self.app.post('/delete', data=dict(
+        entry_id=entry_id
+    ), follow_redirects=True)
+    assert b'Entry to delete' not in rv.data
+    assert b'This entry will be deleted' not in rv.data
+    assert b'Deletion Category' not in rv.data
+
 
 if __name__ == '__main__':
     unittest.main()
