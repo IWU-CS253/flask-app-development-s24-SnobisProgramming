@@ -30,4 +30,4 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
     - name: Test with pytest
       run: |
-        pytest your_unit_tests_script.py
+        pytest unit_tests.py
